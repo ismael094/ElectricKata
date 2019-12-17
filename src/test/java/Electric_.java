@@ -11,72 +11,69 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class Electric_ {
     @Test
     public void with_one_receipt_should_return_good() {
-        Receipt receipt = new Receipt(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.OCTOBER, 17));
-        List<Receipt> receipts = new ArrayList<>();
+        Bill receipt = new Bill(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.OCTOBER, 17));
+        List<Bill> receipts = new ArrayList<>();
         receipts.add(receipt);
-        assertThat(checkDates(receipts)).isEqualTo("Good");
+        assertThat(receiptTimeChecker(receipts)).isEqualTo(STATE.GOOD);
     }
 
     @Test
     public void with_two_receipt_should_return_good() {
-        Receipt receipt = new Receipt(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.OCTOBER, 17));
-        Receipt receipt2 = new Receipt(LocalDate.of(2019, Month.OCTOBER, 17),LocalDate.of(2019, Month.NOVEMBER, 17));
-        List<Receipt> receipts = new ArrayList<>();
+        Bill receipt = new Bill(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.OCTOBER, 17));
+        Bill receipt2 = new Bill(LocalDate.of(2019, Month.OCTOBER, 17),LocalDate.of(2019, Month.NOVEMBER, 17));
+        List<Bill> receipts = new ArrayList<>();
         receipts.add(receipt);
         receipts.add(receipt2);
-        assertThat(checkDates(receipts)).isEqualTo("Good");
+        assertThat(receiptTimeChecker(receipts)).isEqualTo(STATE.GOOD);
     }
 
     @Test
     public void with_two_receipt_with_gap_should_return_gap() {
-        Receipt receipt = new Receipt(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.OCTOBER, 17));
-        Receipt receipt2 = new Receipt(LocalDate.of(2019, Month.NOVEMBER, 17),LocalDate.of(2019, Month.DECEMBER, 17));
-        List<Receipt> receipts = new ArrayList<>();
+        Bill receipt = new Bill(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.OCTOBER, 17));
+        Bill receipt2 = new Bill(LocalDate.of(2019, Month.NOVEMBER, 17),LocalDate.of(2019, Month.DECEMBER, 17));
+        List<Bill> receipts = new ArrayList<>();
         receipts.add(receipt);
         receipts.add(receipt2);
-        assertThat(checkDates(receipts)).isEqualTo("Gap");
+        assertThat(receiptTimeChecker(receipts)).isEqualTo(STATE.GAP);
     }
 
     @Test
     public void with_two_receipt_with_overlap_should_return_overlap() {
-        Receipt receipt = new Receipt(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.OCTOBER, 17));
-        Receipt receipt2 = new Receipt(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.DECEMBER, 17));
-        List<Receipt> receipts = new ArrayList<>();
-        receipts.add(receipt);
-        receipts.add(receipt2);
-        assertThat(checkDates(receipts)).isEqualTo("Overlap");
+        Bill receipt = new Bill(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.OCTOBER, 17));
+        Bill receipt2 = new Bill(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.DECEMBER, 17));
+        List<Bill> bills = new ArrayList<>();
+        bills.add(receipt);
+        bills.add(receipt2);
+        assertThat(receiptTimeChecker(bills)).isEqualTo(STATE.OVERLAP);
     }
 
-    private String checkDates(List<Receipt> receipts) {
-        if (receipts.size() <= 1)
-            return "Good";
-        for (int i = 0; i < receipts.size() -1; i++) {
-
-            if (gap(receipts.get(i).getFinish(),receipts.get(i+1).getStart()))
-                return "Gap";
-            if (overlap(receipts.get(i).getFinish(),receipts.get(i+1).getStart()))
-                return "Overlap";
+    private STATE receiptTimeChecker(List<Bill> bills) {
+        for (int i = 0; i < bills.size() -1; i++) {
+            if (gap(bills.get(i).getFinish(),bills.get(i+1).getStart()))
+                return STATE.GAP;
+            if (overlap(bills.get(i).getFinish(),bills.get(i+1).getStart()))
+                return STATE.OVERLAP;
         }
-        return "Good";
+        return STATE.GOOD;
     }
 
     private boolean overlap(LocalDate finishDate, LocalDate startDate) {
-        if ( ChronoUnit.MONTHS.between(finishDate, startDate) < 0)
+        if ( ChronoUnit.DAYS.between(finishDate, startDate) < 0)
             return true;
         return false;
     }
 
     private boolean gap(LocalDate finishDate, LocalDate startDate) {
-        if ( ChronoUnit.MONTHS.between(finishDate, startDate) >= 1)
+        if ( ChronoUnit.DAYS.between(finishDate, startDate) >= 1)
             return true;
         return false;
     }
 
-    class Receipt {
+    class Bill {
         private LocalDate start;
         private LocalDate finish;
 
-        public Receipt(LocalDate start, LocalDate finish) {
+        public Bill(LocalDate start, LocalDate finish) {
             this.start = start;
             this.finish = finish;
         }
@@ -91,10 +88,10 @@ public class Electric_ {
     }
 
     class User{
-        private List<Receipt> receipts;
+        private List<Bill> receipts;
         private String name;
 
-        public User(List<Receipt> receipts) {
+        public User(List<Bill> receipts) {
             this.receipts = receipts;
         }
     }
