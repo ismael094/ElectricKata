@@ -16,10 +16,18 @@ public class Electric_ {
         assertThat(checkDates(receipts)).isEqualTo("Good");
     }
 
-
+    @Test
+    public void with_two_receipt_should_return_good() {
+        Receipt receipt = new Receipt(LocalDate.of(2019, Month.SEPTEMBER, 17),LocalDate.of(2019, Month.OCTOBER, 17));
+        Receipt receipt2 = new Receipt(LocalDate.of(2019, Month.OCTOBER, 17),LocalDate.of(2019, Month.NOVEMBER, 17));
+        List<Receipt> receipts = new ArrayList<>();
+        receipts.add(receipt);
+        receipts.add(receipt2);
+        assertThat(checkDates(receipts)).isEqualTo("Good");
+    }
 
     private String checkDates(List<Receipt> receipts) {
-        if (receipts.size() == 1)
+        if (receipts.size() <= 2)
             return "Good";
         return "";
     }
